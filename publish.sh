@@ -124,6 +124,7 @@ else
         -H "Content-Type: application/json" \
         -H "api-key: $DEVTO_API_KEY" \
         -d "$JSON_PAYLOAD")
+fi
 
 # 9. Parse and Update File
 # Dev.to API may return unescaped control characters, which breaks jq.
