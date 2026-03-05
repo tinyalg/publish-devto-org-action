@@ -28,7 +28,7 @@ Add `organization_username` to the top of your markdown file.
 ---
 title: My Awesome Article
 published: false
-organization_username: `your_organization_username`
+organization_username: your_organization_username
 ---
 
 Your article content goes here...
