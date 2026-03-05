@@ -1,4 +1,4 @@
-# 🚀 Publish to Dev.to Organization Action
+# Publish to Dev.to Organization Action
 
 A GitHub Action to publish and update Markdown articles to Dev.to, featuring **native Organization support** and **smart ID management**.
 
@@ -14,6 +14,8 @@ By simply adding `organization_username` to your markdown's front matter, this a
 - 🔄 **Smart Updates**: Writes the Dev.to `id` back to your markdown file after the first publish.
 - 👤 **Personal Fallback**: If no organization is specified, it smoothly falls back to publishing to your personal account.
 - 📝 **Draft Control**: Respects `published: true` or `false` in your front matter.
+- ⏱️ **Rate Limit Safe**: Automatically includes a 5-second delay between requests when publishing multiple articles to prevent Forem API rate-limit errors.
+- 🧪 **Dry Run Mode**: Test your workflow and see exactly what JSON payload will be sent without making actual API calls to Dev.to.
 
 ---
 
@@ -26,10 +28,10 @@ Add `organization_username` to the top of your markdown file.
 ---
 title: My Awesome Article
 published: false
-organization_username: tinyalg
+organization_username: `your_organization_username`
 ---
-Your article content goes here...
 
+Your article content goes here...
 ```
 
 *(Note: After the first run, the action will automatically insert `id: <number>` into this front matter.)*
@@ -57,21 +59,51 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Fetch all history so that changed-files can determine the diff
+          fetch-depth: 0
 
-      # Process all markdown files in the posts directory using the wildcard
+      # Step to identify which files in 'posts/' were modified/created
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v47
+        with:
+          files: posts/*.md
+
+      # Only run this step if there are actually changed markdown files
       - name: Publish Articles
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: tinyalg/publish-devto-org-action@main
         with:
           devto_api_key: ${{ secrets.DEVTO_API_KEY }}
-          file_path: 'posts/*.md' # Pass the wildcard pattern
+          # Pass only the changed files (space-separated list) to your action
+          file_path: ${{ steps.changed-files.outputs.all_changed_files }}
 
       # Commit the updated files with newly assigned Dev.to IDs
       - name: Commit Article IDs
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update Dev.to article IDs [skip ci]"
           file_pattern: 'posts/*.md'
 ```
+
+### 🧪 Testing with Dry Run (Safe Mode)
+
+Want to verify your setup without accidentally publishing to Dev.to? You can enable `dry_run` mode. This will process your files and print the exact JSON payload and target API endpoint to the GitHub Actions log, but **will not** send any data to Dev.to.
+
+```yaml
+      - name: Test Publish Articles
+        uses: tinyalg/publish-devto-org-action@main
+        with:
+          devto_api_key: ${{ secrets.DEVTO_API_KEY }}
+          file_path: 'posts/*.md'
+          dry_run: 'true' # Enable dry run mode
+
+```
+
+*(Note: Even in dry run mode, the action will simulate a successful response and write a mock `id` to your markdown file, allowing you to fully test the git-auto-commit step as well!)*
+
 
 ## ⚙️ Inputs
 
@@ -79,7 +111,8 @@ jobs:
 | --- | --- | --- | --- |
 | `devto_api_key` | Your Dev.to API Key. Keep this safe in GitHub Secrets. | Yes | N/A |
 | `file_path` | The path to the markdown file(s) to publish. Supports glob patterns (e.g., posts/*.md). | Yes | N/A |
+| `dry_run` | **(NEW)** If `true`, simulates the process and prints the payload/URL in logs without sending data. | No | `false` |
 
-## 📜 License
+## License
 
 Distributed under the [BSD 3-Clause License](LICENSE).

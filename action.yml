@@ -12,6 +12,11 @@ inputs:
   file_path:
     description: 'Path to the markdown file(s) to publish. Supports glob patterns like "posts/*.md"'
     required: true
+  # ↓ これを追加！
+  dry_run:
+    description: 'If true, simulates the process without sending data to Dev.to'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -20,6 +25,7 @@ runs:
       shell: bash
       env:
         DEVTO_API_KEY: ${{ inputs.devto_api_key }}
+        DRY_RUN: ${{ inputs.dry_run }} # ↓ スクリプトに環境変数として渡す
       run: |
         # Expand the provided path (e.g., posts/*.md) and iterate through each file
         for file in ${{ inputs.file_path }}; do

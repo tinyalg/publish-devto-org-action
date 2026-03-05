@@ -103,10 +103,27 @@ else
 fi
 
 # 8. Execute API Request
-RESPONSE=$(curl -s -X "$METHOD" "$URL" \
-    -H "Content-Type: application/json" \
-    -H "api-key: $DEVTO_API_KEY" \
-    -d "$JSON_PAYLOAD")
+# 8. Execute API Request
+if [ "$DRY_RUN" = "true" ]; then
+    echo "=========================================="
+    echo "🚨 DRY RUN MODE ENABLED 🚨"
+    echo "Would execute: $METHOD $URL"
+    echo "Payload to send:"
+    echo "$JSON_PAYLOAD" | jq .
+    echo "=========================================="
+    
+    # Simulate a successful Dev.to API response
+    if [ -z "$ARTICLE_ID" ]; then
+        MOCK_ID=$((RANDOM % 10000 + 9000000)) # 生成テスト用の適当なダミーID
+        RESPONSE="{\"id\":$MOCK_ID, \"url\":\"https://dev.to/mock/article-$MOCK_ID\"}"
+    else
+        RESPONSE="{\"id\":$ARTICLE_ID, \"url\":\"https://dev.to/mock/article-$ARTICLE_ID\"}"
+    fi
+else
+    RESPONSE=$(curl -s -X "$METHOD" "$URL" \
+        -H "Content-Type: application/json" \
+        -H "api-key: $DEVTO_API_KEY" \
+        -d "$JSON_PAYLOAD")
 
 # 9. Parse and Update File
 # Dev.to API may return unescaped control characters, which breaks jq.
