@@ -73,7 +73,7 @@ jobs:
       # Only run this step if there are actually changed markdown files
       - name: Publish Articles
         if: steps.changed-files.outputs.any_changed == 'true'
-        uses: tinyalg/publish-devto-org-action@main
+        uses: tinyalg/publish-devto-org-action@v1
         with:
           devto_api_key: ${{ secrets.DEVTO_API_KEY }}
           # Pass only the changed files (space-separated list) to your action
