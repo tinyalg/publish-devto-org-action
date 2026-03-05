@@ -69,18 +69,27 @@ fi
 BODY_CONTENT=$(cat "$FILE_PATH")
 
 # 6. Build JSON payload
-# If TARGET_ORG_ID is empty, set to null. Otherwise, convert to number.
+# Omit organization_id completely if TARGET_ORG_ID is empty
 JSON_PAYLOAD=$(jq -n \
     --arg body "$BODY_CONTENT" \
     --arg org "$TARGET_ORG_ID" \
     --argjson pub "$PUBLISHED_VALUE" \
-    '{
-        "article": {
-            "body_markdown": $body,
-            "published": $pub,
-            "organization_id": ($org | if . == "" then null else .|tonumber end)
+    'if $org == "" then
+        {
+            "article": {
+                "body_markdown": $body,
+                "published": $pub
+            }
         }
-    }')
+    else
+        {
+            "article": {
+                "body_markdown": $body,
+                "published": $pub,
+                "organization_id": ($org | tonumber)
+            }
+        }
+    end')
 
 # 7. Determine Method and URL
 if [ -n "$ARTICLE_ID" ]; then

@@ -27,6 +27,10 @@ runs:
           if [ -f "$file" ]; then
             echo "Processing $file..."
             bash ${{ github.action_path }}/publish.sh "$file"
+            
+            # Add a 5-second delay to avoid Dev.to API rate limits (Retry later)
+            echo "Sleeping for 5 seconds to respect API limits..."
+            sleep 5
           else
             echo "No files matched for $file"
           fi
