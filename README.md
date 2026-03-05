@@ -113,6 +113,16 @@ Want to verify your setup without accidentally publishing to Dev.to? You can ena
 | `file_path` | The path to the markdown file(s) to publish. Supports glob patterns (e.g., posts/*.md). | Yes | N/A |
 | `dry_run` | **(NEW)** If `true`, simulates the process and prints the payload/URL in logs without sending data. | No | `false` |
 
+
+## 🤝 Feedback & Contributions
+
+I originally built this action to solve my own Dev.to publishing workflow. Since it worked perfectly for me, I'm sharing it with the community in hopes it helps you too!
+
+If you encounter any bugs or have feature requests, please feel free to **open an Issue** or submit a Pull Request. 
+However, please understand that I maintain this in my free time, so I cannot guarantee a prompt response or a fix.
+
+**Note:** This action is provided "as-is". Please test it thoroughly with the `dry_run` option before using it in your production workflow.
+
 ## License
 
 Distributed under the [BSD 3-Clause License](LICENSE).
