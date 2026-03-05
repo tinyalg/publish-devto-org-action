@@ -1,0 +1,33 @@
+name: 'Publish to Dev.to Organization'
+description: 'A GitHub Action to publish Markdown articles to Dev.to with native Organization support.'
+author: 'tinyalg'
+branding:
+  icon: 'upload-cloud'
+  color: 'blue'
+
+inputs:
+  devto_api_key:
+    description: 'Your Dev.to API Key (Passed via secrets)'
+    required: true
+  file_path:
+    description: 'Path to the markdown file(s) to publish. Supports glob patterns like "posts/*.md"'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Publish Script
+      shell: bash
+      env:
+        DEVTO_API_KEY: ${{ inputs.devto_api_key }}
+      run: |
+        # Expand the provided path (e.g., posts/*.md) and iterate through each file
+        for file in ${{ inputs.file_path }}; do
+          # Check if the file actually exists to avoid errors on empty matches
+          if [ -f "$file" ]; then
+            echo "Processing $file..."
+            bash ${{ github.action_path }}/publish.sh "$file"
+          else
+            echo "No files matched for $file"
+          fi
+        done
