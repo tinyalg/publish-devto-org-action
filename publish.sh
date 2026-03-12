@@ -36,12 +36,24 @@ fi
 ARTICLE_ID=$(head -n 20 "$FILE_PATH" | grep -Ei "^id:[[:space:]]*[0-9]+" | head -n 1 | sed 's/[^0-9]//g')
 
 # 2. Extract 'published' status
-EXTRACTED_PUB=$(head -n 20 "$FILE_PATH" | grep -Ei "^published:[[:space:]]*(true|false)" | head -n 1 | awk '{print tolower($2)}' | xargs)
-
-if [ "$EXTRACTED_PUB" = "true" ]; then
-    PUBLISHED_VALUE=true
+if [ "$USE_HUGO_DRAFT" = "true" ]; then
+    # Hugoモード: 'draft' を読み取って反転させる
+    EXTRACTED_DRAFT=$(head -n 20 "$FILE_PATH" | grep -Ei "^draft:[[:space:]]*(true|false)" | head -n 1 | awk '{print tolower($2)}' | xargs)
+    if [ "$EXTRACTED_DRAFT" = "true" ]; then
+        PUBLISHED_VALUE=false
+    elif [ "$EXTRACTED_DRAFT" = "false" ]; then
+        PUBLISHED_VALUE=true
+    else
+        PUBLISHED_VALUE=false
+    fi
 else
-    PUBLISHED_VALUE=false
+    # 従来モード: そのまま 'published' を読み取る
+    EXTRACTED_PUB=$(head -n 20 "$FILE_PATH" | grep -Ei "^published:[[:space:]]*(true|false)" | head -n 1 | awk '{print tolower($2)}' | xargs)
+    if [ "$EXTRACTED_PUB" = "true" ]; then
+        PUBLISHED_VALUE=true
+    else
+        PUBLISHED_VALUE=false
+    fi
 fi
 
 # 3. Extract Organization username (e.g., "organization_username: tinyalg")
@@ -102,7 +114,6 @@ else
     URL="https://dev.to/api/articles"
 fi
 
-# 8. Execute API Request
 # 8. Execute API Request
 if [ "$DRY_RUN" = "true" ]; then
     echo "=========================================="
