@@ -64,7 +64,7 @@ on:
     branches:
       - main
     paths:
-      - 'posts/**.md' # Trigger workflow when markdown files in the posts directory change
+      - 'content/**.md' # Trigger workflow when markdown files in the content directory change
 
 jobs:
   publish:
@@ -74,17 +74,17 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Fetch all history so that changed-files can determine the diff
           fetch-depth: 0
 
-      # Step to identify which files in 'posts/' were modified/created
+      # Step to identify which files in 'content/' were modified/created
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v47
         with:
-          files: posts/*.md
+          files: content/**/*.md
 
       # Only run this step if there are actually changed markdown files
       - name: Publish Articles
@@ -102,7 +102,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: update Dev.to article IDs [skip ci]"
-          file_pattern: 'posts/*.md'
+          file_pattern: 'content/**/*.md'
 ```
 
 ### 🧪 Testing with Dry Run (Safe Mode)
@@ -114,7 +114,7 @@ Want to verify your setup without accidentally publishing to Dev.to? You can ena
         uses: tinyalg/publish-devto-org-action@v1
         with:
           devto_api_key: ${{ secrets.DEVTO_API_KEY }}
-          file_path: 'posts/*.md'
+          file_path: 'content/**/*.md'
           dry_run: 'true' # Enable dry run mode
 
 ```
@@ -126,7 +126,7 @@ Want to verify your setup without accidentally publishing to Dev.to? You can ena
 | Input | Description | Required | Default |
 | --- | --- | --- | --- |
 | `devto_api_key` | Your Dev.to API Key. Keep this safe in GitHub Secrets. | Yes | N/A |
-| `file_path` | The path to the markdown file(s) to publish. Supports glob patterns (e.g., posts/*.md). | Yes | N/A |
+| `file_path` | The path to the markdown file(s) to publish. Supports glob patterns (e.g., content/**/*.md). | Yes | N/A |
 | `use_hugo_draft` | **(NEW)** If `true`, reads Hugo's `draft: true/false` instead of `published` and inverts it for Dev.to. | No | `false` |
 | `dry_run` | If `true`, simulates the process and prints the payload/URL in logs without sending data. | No | `false` |
 
